@@ -4,7 +4,7 @@ from .models import *
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'slug']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -12,7 +12,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'rating', 'comment', 'user', 'created_at']
+        fields = ['id', 'rating', 'comment', 'user']
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -32,4 +32,5 @@ class ProductSerializer(serializers.ModelSerializer):
         reviews = obj.reviews.all()
         if reviews.exists():
             return sum([r.rating for r in reviews]) / reviews.count()
-        return None      
+        return None     
+     
