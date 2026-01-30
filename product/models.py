@@ -15,21 +15,19 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Size(models.Model):
+    
+    value = models.CharField(max_length=10, unique=True)
+
+    def __str__(self):
+        return self.value
+    
 
 class Product(models.Model):
 
     GENDER=[
     ('male','Male'),
     ('female','Female')
-    ]
-
-    SIZE=[
-        ('15','15'),
-        ('16','16'),
-        ('17','17'),
-        ('31','31'),
-        ('32','32'),
-        ('33','33'),
     ]
 
     image = models.URLField()
@@ -39,7 +37,7 @@ class Product(models.Model):
     price = models.IntegerField()
     stock = models.IntegerField()
     available = models.BooleanField(default=True)
-    size = models.CharField(max_length=10,choices=SIZE)
+    sizes = models.ManyToManyField(Size, related_name='products')
     gender = models.CharField(max_length=15,choices=GENDER)
     category = models.ForeignKey(Category,on_delete=models.CASCADE)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
@@ -51,6 +49,7 @@ class Product(models.Model):
         reviews = self.reviews.all()
         if reviews.count() > 0:
           return sum(rating.rating for rating in reviews)
+        
 
 
 class Review(models.Model):
