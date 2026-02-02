@@ -3,13 +3,17 @@ from .models import *
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.ReadOnlyField(source='product.name')
+    product_title = serializers.ReadOnlyField(source='product.title')
+    product_image = serializers.ReadOnlyField(source='product.image')
     product_price = serializers.ReadOnlyField(source='product.price')
     total_price = serializers.SerializerMethodField()
     class Meta:
+        model = CartItem
         fields = [
+            'id',
             'product',
-            'product_name',
+            'product_image',
+            'product_title',
             'product_price',
             'quantity',
             'total_price'
@@ -36,4 +40,4 @@ class CartSerializer(serializers.ModelSerializer):
         return obj.get_total_cost()    
     
     def get_total_items(self,obj):
-        return obj.get_total_item()
+        return obj.get_total_items()

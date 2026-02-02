@@ -5,6 +5,7 @@ from user.models import *
 # Create your models here.
 class Cart(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
@@ -23,7 +24,7 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity}"
+        return f"{self.product.title} - {self.quantity}"
     
     def get_cost(self):
         return self.product.price*self.quantity
