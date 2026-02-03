@@ -2,12 +2,13 @@ from rest_framework import serializers
 from .models import *
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.ReadOnlyField(source='product.name')  # optional: show product name
+    product_name = serializers.ReadOnlyField(source='product.title',read_only=True) 
+    product_image = serializers.URLField(source='product.image', read_only=True)
     total_cost = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'product_name', 'quantity', 'price', 'total_cost']
+        fields = ['id', 'product', 'product_name', 'product_image', 'quantity', 'price', 'total_cost']
 
     def get_total_cost(self, obj):
         return obj.get_cost()
@@ -22,8 +23,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'user',
-            'first_name',
-            'last_name',
             'email',
             'phone',
             'address',

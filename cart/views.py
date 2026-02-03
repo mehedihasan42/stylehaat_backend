@@ -11,8 +11,10 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 import requests
 from django.conf import settings
 from django.shortcuts import redirect
+from order.models import *
 from django.http import JsonResponse
 from rest_framework.decorators import api_view,permission_classes
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 class AddToCart(APIView):
@@ -85,47 +87,3 @@ class ClearCart(GenericAPIView):
         cart.cart_items.all().delete()          
         return Response({'details':'Cart is cleared'})
         
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def sslcommerz_payment(request):
-    post_data = {
-        "store_id": settings.SSLCOMMERZE_STORE_ID,
-        "store_passwd": settings.SSLCOMMERZE_STORE_PASSWORD,
-        "total_amount": "100",
-        "currency": "BDT",
-        "tran_id": "TXN123456",
-        "success_url": "http://127.0.0.1:8000/cart/payment/success/",
-        "fail_url": "http://127.0.0.1:8000/cart/payment/fail/",
-        "cancel_url": "http://127.0.0.1:8000/cart/payment/cancel/",
-        "cus_name": "Mehedi Hasan",
-        "cus_email": "test@gmail.com",
-        "cus_add1": "Dhaka",
-        "cus_city": "Dhaka",
-        "cus_country": "Bangladesh",
-        "cus_phone": "01700000000",
-        "shipping_method": "NO",
-        "product_name": "Test Product",
-        "product_category": "General",
-        "product_profile": "general",
-    }
-
-    url = "https://sandbox.sslcommerz.com/gwprocess/v4/api.php"
-    response = requests.post(url, data=post_data)
-    data = response.json()
-
-    if data.get("status") == "SUCCESS":
-        # Return Gateway URL in JSON
-        return JsonResponse({"url": data["GatewayPageURL"]})
-    
-    return JsonResponse({"error": "Payment initiation failed"}, status=400)
-
-
-def payment_success(request):
-    return Response("Payment Successful ✅")
-
-def payment_fail(request):
-    return Response("Payment Failed ❌")
-
-def payment_cancel(request):
-    return Response("Payment Cancelled ⚠️")
