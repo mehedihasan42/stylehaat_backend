@@ -6,6 +6,8 @@ from .models import *
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from order.models import OrderItem
+from rest_framework import status
 
 # Create your views here.
 class SellerOnlyView(APIView):
@@ -22,6 +24,12 @@ class CategoryListCreate(ListCreateAPIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+class SizeList(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        sizes = Size.objects.all().values_list('value', flat=True).distinct()
+        return Response(list(sizes))
 
 class ProductListCreate(ListCreateAPIView):
     queryset = Product.objects.all()
@@ -65,4 +73,33 @@ class ProductListCreate(ListCreateAPIView):
 
         return queryset
 
+class ReviewList(ListCreateAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        product = self.request.query_params.get('product')
+        return Review.objects.filter(product=product)
+
+    def post(self,request,*args, **kwargs):
+        product_id = request.data.get('product')
+        product = Product.objects.get(id=product_id)
+        rating = request.data.get('rating')
+        comment = request.data.get('comment', '')
+        purchased_items = OrderItem.objects.filter(
+                                            order__user=request.user,
+                                            product_id=product_id,
+                                            order__paid=True
+                                            )
+        if not purchased_items.exists():
+            return Response({'details':'You can only review products you have purchased.'})
+        serializer = self.get_serializer(data={
+            'product': product_id,
+            'rating': rating,
+            'comment': comment
+        })
+
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data,status=status.HTTP_201_CREATED)    
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

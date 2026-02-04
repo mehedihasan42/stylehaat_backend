@@ -9,10 +9,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)  
+    username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = Review
-        fields = ['id', 'rating', 'comment', 'user']
+        fields = '__all__'
 
 
 class SizeSerializer(serializers.ModelSerializer):

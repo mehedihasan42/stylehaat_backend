@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator,MinValueValidator
+from ckeditor.fields import RichTextField
 from user.models import *
 
 # Create your models here.
@@ -50,8 +51,7 @@ class Product(models.Model):
         if reviews.count() > 0:
           return sum(rating.rating for rating in reviews)
         
-
-
+        
 class Review(models.Model):
     rating = models.SmallIntegerField(validators=[MaxValueValidator(5),MinValueValidator(1)])
     comment = models.TextField()

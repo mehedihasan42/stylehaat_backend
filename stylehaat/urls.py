@@ -22,4 +22,5 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('order/', include('order.urls')),
     path('user/', include('user.urls')),
+    path('djrichtextfield/', include('djrichtextfield.urls'))
 ]

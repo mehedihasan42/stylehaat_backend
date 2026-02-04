@@ -28,6 +28,7 @@ class Order(models.Model):
     
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.order_items.all())
+   
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order,on_delete=models.CASCADE,related_name='order_items')

@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework import status
+from django.shortcuts import redirect
 from uuid import uuid4
 
 # Create your views here.
@@ -36,19 +37,16 @@ class OrderCheckoutView(APIView):
         user = request.user
         data = request.data
 
-        # Expecting: email, phone, address, city, post, house_number
         required_fields = ['email','phone','address','city','post','house_number']
         for field in required_fields:
             if field not in data:
                 return Response({"error": f"{field} is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Get user's cart
         try:
             cart = Cart.objects.get(user=user)
         except Cart.DoesNotExist:
             return Response({"error": "Cart not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Create Order
         order = Order.objects.create(
             user=user,
             email=data['email'],
@@ -58,10 +56,9 @@ class OrderCheckoutView(APIView):
             post=data['post'],
             house_number=data['house_number'],
             paid=False,
-            transection_id=0  # temporary, will update after payment
+            transection_id=0 
         )
 
-        # Move cart items to order items
         for item in cart.cart_items.all():
             order.order_items.create(
                 product=item.product,
@@ -69,7 +66,6 @@ class OrderCheckoutView(APIView):
                 price=item.product.price
             )
 
-        # Create Payment
         tran_id = str(uuid4())
         Payment.objects.create(
             customer=user,
@@ -79,7 +75,6 @@ class OrderCheckoutView(APIView):
             status='pendding'
         )
 
-        # Prepare SSLCommerz data
         post_data = {
             "store_id": settings.SSLCOMMERZE_STORE_ID,
             "store_passwd": settings.SSLCOMMERZE_STORE_PASSWORD,
@@ -101,13 +96,11 @@ class OrderCheckoutView(APIView):
             "product_profile": "general",
         }
 
-        # Send request to SSLCommerz
         url = "https://sandbox.sslcommerz.com/gwprocess/v4/api.php"
         response = requests.post(url, data=post_data)
         result = response.json()
 
         if result.get("status") == "SUCCESS":
-            # Clear the cart
             cart.cart_items.all().delete()
             return Response({"payment_url": result["GatewayPageURL"]})
 
@@ -124,13 +117,20 @@ def payment_success(request):
         payment.status = 'success'
         payment.save()
 
-        # Update the order as paid
         order = Order.objects.get(user=payment.customer, paid=False)
         order.paid = True
         order.transection_id = tran_id
         order.save()
 
-        return Response({"message": "Payment Successful ✅"})
+        for item in order.order_items.all():
+            product = item.product
+            product.stock -= item.quantity
+            
+            if product.stock < 1:
+                return Response({'details':'Stock is empty'})
+            product.save()
+
+        return redirect('http://localhost:5173/order-list')
     except Payment.DoesNotExist:
         return Response({"error": "Payment not found"}, status=404)
     except Order.DoesNotExist:
@@ -140,10 +140,10 @@ def payment_success(request):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def payment_fail(request):
-    return Response({"message": "Payment Failed ❌"})
+    return redirect('http://localhost:5173/payment-failed')
 
 @csrf_exempt
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def payment_cancel(request):
-    return Response({"message": "Payment Cancelled ⚠️"})
+    return redirect('http://localhost:5173/payment-cancelled')
