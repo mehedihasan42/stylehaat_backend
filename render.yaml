@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: stylehaat-backend
-    env: python
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "gunicorn myproject.wsgi:application"
-    pythonVersion: 3.12
