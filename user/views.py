@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from .serializer import *
+from django.contrib.auth import authenticate, login
+from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -32,8 +34,29 @@ class SignupView(APIView):
 
 
 
-class LoginView(TokenObtainPairView):
+class LoginView(APIView):
     permission_classes = [AllowAny]
-    serializer_class = MyTokenObtainPairSerializer
 
-    
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email
+                }
+            }, status=status.HTTP_200_OK)
+
+        return Response(
+            {"error": "Invalid credentials"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )

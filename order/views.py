@@ -127,7 +127,7 @@ def payment_success(request):
             product.stock -= item.quantity
             
             if product.stock < 1:
-                return Response({'details':'Stock is empty'})
+                return Response({'details':'Stock out'})
             product.save()
 
         return redirect('https://stylehaat.netlify.app/order-list')
