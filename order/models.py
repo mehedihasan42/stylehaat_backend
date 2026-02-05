@@ -2,6 +2,7 @@ from django.db import models
 from product.models import *
 from user.models import *
 from cart.models import *
+from order.models import *
 
 # Create your models here.
 class Order(models.Model):
@@ -42,6 +43,7 @@ class OrderItem(models.Model):
 class Payment(models.Model):
     customer = models.ForeignKey(User,on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart,on_delete=models.CASCADE)
+    order = models.ForeignKey(Order,on_delete=models.CASCADE)
     tran_id = models.CharField(max_length=20)
     amount = models.DecimalField(max_digits=7,decimal_places=2)
     status = models.CharField(max_length=10,choices=[

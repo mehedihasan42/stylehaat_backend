@@ -70,6 +70,7 @@ class OrderCheckoutView(APIView):
         Payment.objects.create(
             customer=user,
             cart=cart,
+            order=order,
             tran_id=tran_id,
             amount=cart.get_total_cost(),
             status='pendding'
@@ -117,7 +118,7 @@ def payment_success(request):
         payment.status = 'success'
         payment.save()
 
-        order = Order.objects.get(user=payment.customer, paid=False)
+        order = payment.order
         order.paid = True
         order.transection_id = tran_id
         order.save()
