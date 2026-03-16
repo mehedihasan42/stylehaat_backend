@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ty(e=+00-zdd807@-*9ynd$_e-slmh9qx1q2ee6ps@yo)3@lm%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['stylehaat-backend.onrender.com',
                  'localhost'
