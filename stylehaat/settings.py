@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-ty(e=+00-zdd807@-*9ynd$_e-slmh9qx1q2ee6ps@yo)3@lm%
 DEBUG = False
 
 ALLOWED_HOSTS = ['stylehaat-backend.onrender.com',
-                 'localhost'
+                 'localhost',
+                 'stylehaat.netlify.app'
                  ]
 
 # Application definition
@@ -61,6 +62,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://stylehaat.netlify.app"
 ]
 
 CORS_ALLOWED_ORIGINS = [
