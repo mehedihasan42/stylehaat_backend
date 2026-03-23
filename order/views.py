@@ -19,7 +19,7 @@ from uuid import uuid4
 class OrdersList(ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
-    authentication_classes = []
+    # authentication_classes = []
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
