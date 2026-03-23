@@ -34,8 +34,8 @@ class SizeList(APIView):
 class ProductListCreate(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
     authentication_classes = []
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -75,6 +75,7 @@ class ProductListCreate(ListCreateAPIView):
 
 class ReviewList(ListCreateAPIView):
     serializer_class = ReviewSerializer
+    authentication_classes = []
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -103,3 +104,4 @@ class ReviewList(ListCreateAPIView):
             serializer.save(user=request.user)
             return Response(serializer.data,status=status.HTTP_201_CREATED)    
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
