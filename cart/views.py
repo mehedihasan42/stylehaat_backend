@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from product.models import *
 from .models import *
 from .serializer import *
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView,RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated,AllowAny
 import requests
@@ -15,6 +15,7 @@ from order.models import *
 from django.http import JsonResponse
 from rest_framework.decorators import api_view,permission_classes
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 
 # Create your views here.
 class AddToCart(APIView):
@@ -34,32 +35,30 @@ class AddToCart(APIView):
 
         if quantity < 1:
             return Response({'details':'product quantity must be at last one'},status=status.HTTP_400_BAD_REQUEST)
+        
+        with transaction.atomic:
+            cart,_ = Cart.objects.get_or_create(user=request.user)
 
-        cart,_ = Cart.objects.get_or_create(user=request.user)
+            cart_item,created  = CartItem.objects.get_or_create(
+                cart=cart,
+                product=product,
+                size = size
+            )
 
-        cart_item,created  = CartItem.objects.get_or_create(
-            cart=cart,
-            product=product,
-            size = size
-        )
-
-        if not created:
-            cart_item.quantity += quantity
-        else:
-            cart_item.quantity = quantity  
-        cart_item.save()    
+            if not created:
+                cart_item.quantity += quantity
+            else:
+                cart_item.quantity = quantity  
+            cart_item.save()    
 
         return Response(CartSerializer(cart).data,status=status.HTTP_200_OK)
 
-class CartDetail(GenericAPIView):
+class CartDetail(RetrieveAPIView):
     serializer_class = CartSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    def get(self,request):
-        cart = Cart.objects.get(user=request.user)
-        serializer = self.get_serializer(cart)
-        return Response(serializer.data)
-    
+    def get_object(self):
+        return Cart.objects.get(user=self.request.user)
 
 class UpdateCartItem(GenericAPIView):
     # permission_classes = [IsAuthenticated]
