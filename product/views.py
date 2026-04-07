@@ -75,7 +75,6 @@ class ProductListCreate(ListCreateAPIView):
 
 class ReviewList(ListCreateAPIView):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         product = self.request.query_params.get('product')
@@ -103,4 +102,9 @@ class ReviewList(ListCreateAPIView):
             serializer.save(user=request.user)
             return Response(serializer.data,status=status.HTTP_201_CREATED)    
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
     
