@@ -36,20 +36,19 @@ class AddToCart(APIView):
         if quantity < 1:
             return Response({'details':'product quantity must be at last one'},status=status.HTTP_400_BAD_REQUEST)
         
-        with transaction.atomic:
-            cart,_ = Cart.objects.get_or_create(user=request.user)
+        cart,_ = Cart.objects.get_or_create(user=request.user)
 
-            cart_item,created  = CartItem.objects.get_or_create(
+        cart_item,created  = CartItem.objects.get_or_create(
                 cart=cart,
                 product=product,
                 size = size
             )
 
-            if not created:
+        if not created:
                 cart_item.quantity += quantity
-            else:
+        else:
                 cart_item.quantity = quantity  
-            cart_item.save()    
+        cart_item.save()    
 
         return Response(CartSerializer(cart).data,status=status.HTTP_200_OK)
 

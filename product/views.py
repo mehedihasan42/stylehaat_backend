@@ -75,7 +75,6 @@ class ProductListCreate(ListCreateAPIView):
 
 class ReviewList(ListCreateAPIView):
     serializer_class = ReviewSerializer
-    authentication_classes = []
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -88,10 +87,10 @@ class ReviewList(ListCreateAPIView):
         rating = request.data.get('rating')
         comment = request.data.get('comment', '')
         purchased_items = OrderItem.objects.filter(
-                                            order__user=request.user,
-                                            product_id=product_id,
-                                            order__paid=True
-                                            )
+            order__user=request.user,
+            product_id=product_id,
+            order__paid=True
+            )
         if not purchased_items.exists():
             return Response({'details':'You can only review products you have purchased.'})
         serializer = self.get_serializer(data={
