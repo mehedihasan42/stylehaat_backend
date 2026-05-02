@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from order.models import OrderItem
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 class SellerOnlyView(APIView):
@@ -77,34 +78,36 @@ class ReviewList(ListCreateAPIView):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        product = self.request.query_params.get('product')
-        return Review.objects.filter(product=product)
-
-    def post(self,request,*args, **kwargs):
-        product_id = request.data.get('product')
-        product = Product.objects.get(id=product_id)
-        rating = request.data.get('rating')
-        comment = request.data.get('comment', '')
-        purchased_items = OrderItem.objects.filter(
-            order__user=request.user,
-            product_id=product_id,
-            order__paid=True
-            )
-        if not purchased_items.exists():
-            return Response({'details':'You can only review products you have purchased.'})
-        serializer = self.get_serializer(data={
-            'product': product_id,
-            'rating': rating,
-            'comment': comment
-        })
-
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data,status=status.HTTP_201_CREATED)    
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        product_id = self.request.query_params.get('product')
+        if not product_id:
+            return Review.objects.none()
+        return Review.objects.filter(product_id=product_id).select_related('user')
     
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
         return [IsAuthenticated()]
-    
+
+    def perform_create(self, serializer):
+        request = self.request
+        product_id = request.data.get('product')
+
+        if not product_id:
+            return Response('This product does not exits')
+        
+        product = get_object_or_404(Product,id=product_id)
+        
+        has_purches = OrderItem.objects.filter(
+            product_id=product_id,
+            order__user=request.user,
+            order__paid=True
+            ).exists()
+        
+        if not has_purches:
+            raise serializers.ValidationError({"detail": "You can only review products you have purchased."}) 
+        
+        if Review.objects.filter(user=request.user,product=product).exists():
+            raise serializers.ValidationError({'details':'You already reviewed this product'})
+        
+        serializer.save(user=request.user,product=product)
+        

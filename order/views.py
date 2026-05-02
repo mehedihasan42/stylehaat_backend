@@ -83,9 +83,9 @@ class OrderCheckoutView(APIView):
             "total_amount": str(cart.get_total_cost()),
             "currency": "BDT",
             "tran_id": tran_id,
-            "success_url": "https://stylehaat-backend.onrender.com/order/payment/success/",
-            "fail_url": "https://stylehaat-backend.onrender.com/order/payment/fail/",
-            "cancel_url": "https://stylehaat-backend.onrender.com/order/payment/cancel/",
+            "success_url": "http://localhost:8000/order/payment/success/",
+            "fail_url": "http://localhost:8000/order/payment/fail/",
+            "cancel_url": "http://localhost:8000/order/payment/cancel/",
             "cus_name": f"{user.first_name} {user.last_name}",
             "cus_email": user.email,
             "cus_add1": data['address'],
@@ -132,7 +132,7 @@ def payment_success(request):
                 return Response({'details':'Stock out'})
             product.save()
 
-        return redirect('https://stylehaat.netlify.app/order-list')
+        return redirect('https://stylehaat-shop.netlify.app/order-list')
     except Payment.DoesNotExist:
         return Response({"error": "Payment not found"}, status=404)
     except Order.DoesNotExist:
@@ -142,10 +142,10 @@ def payment_success(request):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def payment_fail(request):
-    return redirect('https://stylehaat.netlify.app/payment-failed')
+    return redirect('https://stylehaat-shop.netlify.app/payment-failed')
 
 @csrf_exempt
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def payment_cancel(request):
-    return redirect('https://stylehaat.netlify.app/payment-cancelled')
+    return redirect('https://stylehaat-shop.netlify.app/payment-cancelled')
