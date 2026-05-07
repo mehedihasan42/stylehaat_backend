@@ -29,7 +29,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['stylehaat-backend.onrender.com',
                  'localhost',
-                 'stylehaat.netlify.app'
+                 'https://stylehaat-my-shop.netlify.app'
                  ]
 
 # Application definition
@@ -71,12 +71,12 @@ MIDDLEWARE = [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173"
-    "https://stylehaat.netlify.app"
+    "https://stylehaat-my-shop.netlify.app"
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://stylehaat.netlify.app"
+    "https://stylehaat-my-shop.netlify.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
