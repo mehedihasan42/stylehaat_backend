@@ -132,7 +132,7 @@ def payment_success(request):
                 return Response({'details':'Stock out'})
             product.save()
 
-        return redirect('https://stylehaat-shop.netlify.app/order-list')
+        return redirect('http://localhost:5173/order-list')
     except Payment.DoesNotExist:
         return Response({"error": "Payment not found"}, status=404)
     except Order.DoesNotExist:
@@ -142,10 +142,10 @@ def payment_success(request):
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def payment_fail(request):
-    return redirect('https://stylehaat-shop.netlify.app/payment-failed')
+    return redirect('http://localhost:5173/payment-failed')
 
 @csrf_exempt
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def payment_cancel(request):
-    return redirect('https://stylehaat-shop.netlify.app/payment-cancelled')
+    return redirect('http://localhost:5173/payment-cancelled')

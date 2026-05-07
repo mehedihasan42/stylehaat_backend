@@ -70,11 +70,13 @@ MIDDLEWARE = [
 # ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://stylehaat-shop.netlify.app"
+    "http://localhost:5173"
+    "https://stylehaat.netlify.app"
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://stylehaat-shop.netlify.app",
+    "http://localhost:5173",
+    "https://stylehaat.netlify.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
