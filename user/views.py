@@ -6,6 +6,7 @@ from .serializer import *
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -60,3 +61,24 @@ class LoginView(APIView):
             {"error": "Invalid credentials"},
             status=status.HTTP_401_UNAUTHORIZED
         )
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+    
+    def put(self,request):
+        serializer = UserSerializer(
+            request.user,
+            data = request.data,
+            partial = True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=200)   
+        
+        return Response(serializer.errors,status=400)    

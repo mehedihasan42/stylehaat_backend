@@ -25,11 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ty(e=+00-zdd807@-*9ynd$_e-slmh9qx1q2ee6ps@yo)3@lm%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['stylehaat-backend.onrender.com',
                  'localhost',
-                 'https://stylehaat-my-shop.netlify.app'
+                 'https://stylehaat.netlify.app'
                  ]
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    # 'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'corsheaders',
     'djrichtextfield',
@@ -71,12 +72,12 @@ MIDDLEWARE = [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173"
-    "https://stylehaat-my-shop.netlify.app"
+    "https://stylehaat.netlify.app"
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://stylehaat-my-shop.netlify.app"
+    "https://stylehaat.netlify.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
