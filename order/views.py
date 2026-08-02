@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view,permission_classes,APIView
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.generics import ListCreateAPIView,UpdateAPIView,ListAPIView
+from rest_framework.permissions import IsAuthenticated,AllowAny,BasePermission
 from cart.models import *
 from .models import *
 from .serializer import *
@@ -16,13 +16,40 @@ from django.shortcuts import redirect
 from uuid import uuid4
 
 # Create your views here.
+class IsAdminRole(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'admin'
+    
+@api_view(["GET"])
+@permission_classes([IsAdminRole])
+def get_revenue(request):
+    delivered_orders = Order.objects.filter(status="delivered", paid=True)
+    revenue = sum(order.get_total_cost() for order in delivered_orders)
+
+    return Response({
+        "revenue": revenue
+    })
+
 class OrdersList(ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     # authentication_classes = []
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        user = self.request.user
+
+        if user.is_staff:  
+            return Order.objects.exclude(status='delivered')
+        return Order.objects.filter(user=user)
+
+
+class DeliveredOrderList(ListAPIView):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminRole]
+
+    def get_queryset(self):
+        return Order.objects.filter(status='delivered')
+
 
 class OrderItemList(ListCreateAPIView):
     serializer_class = OrderItemSerializer
@@ -30,6 +57,12 @@ class OrderItemList(ListCreateAPIView):
 
     def get_queryset(self):
         return OrderItem.objects.filter(order__user=self.request.user)
+
+class OrderUpdateAPIView(UpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminRole]
+
 
 class OrderCheckoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -108,6 +141,7 @@ class OrderCheckoutView(APIView):
 
         return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @csrf_exempt
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
@@ -143,6 +177,7 @@ def payment_success(request):
 @permission_classes([AllowAny])
 def payment_fail(request):
     return redirect('http://localhost:5173/payment-failed')
+
 
 @csrf_exempt
 @api_view(["GET", "POST"])

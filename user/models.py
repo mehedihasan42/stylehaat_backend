@@ -10,7 +10,7 @@ class User(AbstractUser):
     ]
     email = models.EmailField()
     phone = models.CharField(max_length=12)
-    role = models.CharField(max_length=15,choices=ROLE)
+    role = models.CharField(max_length=15,choices=ROLE,default='customer')
     
     def __str__(self):
         return f"{self.username} - {self.role}"

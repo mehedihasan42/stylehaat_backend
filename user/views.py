@@ -6,9 +6,32 @@ from .serializer import *
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import generics
+
+
+class UserList(generics.ListAPIView):
+    serializer_class = UserSerializer  
+    # permission_classes = [IsAdminUser] 
+
+    def get_queryset(self):
+        queryset = User.objects.all()
+
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+
+        return queryset
+
+
+class UserByUserNameView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    lookup_field = 'username'
+
 
 class SignupView(APIView):
     permission_classes = [AllowAny]
@@ -32,7 +55,6 @@ class SignupView(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class LoginView(APIView):
@@ -68,7 +90,7 @@ class ProfileView(APIView):
 
     def get(self,request):
         serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+        return Response(serializer.data)    
     
     def put(self,request):
         serializer = UserSerializer(

@@ -3,12 +3,14 @@ from rest_framework.generics import ListCreateAPIView,RetrieveDestroyAPIView
 from django.db.models import Avg,Min,Max,Sum
 from .serializer import *
 from .models import *
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from order.models import OrderItem
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import BasePermission
 
 # Create your views here.
 class SellerOnlyView(APIView):
@@ -18,6 +20,10 @@ class SellerOnlyView(APIView):
         if request.user.role != 'seller':
             return Response({"error": "Access denied"}, status=403)
         return Response({"message": "Welcome Seller"})
+
+class IsAdminRole(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'admin'   
 
 class CategoryListCreate(ListCreateAPIView):
     queryset = Category.objects.all()
@@ -35,8 +41,7 @@ class SizeList(APIView):
 class ProductListCreate(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = []
-    permission_classes = [AllowAny]
+    # authentication_classes = []
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -73,6 +78,17 @@ class ProductListCreate(ListCreateAPIView):
             ).filter(average_rating__gte=int(rating))
 
         return queryset
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAdminRole()]
+        return [AllowAny()]
+
+
+class ProductUpdate(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
 
 class ReviewList(ListCreateAPIView):
     serializer_class = ReviewSerializer

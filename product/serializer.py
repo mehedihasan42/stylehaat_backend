@@ -23,11 +23,23 @@ class SizeSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    user = serializers.StringRelatedField(read_only=True) 
+    # category = CategorySerializer()
+    # user = serializers.StringRelatedField() 
+    # average_rating = serializers.SerializerMethodField()
     reviews = ReviewSerializer(many=True, read_only=True)
-    average_rating = serializers.SerializerMethodField()
     sizes = serializers.SerializerMethodField()
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all()
+    )
+
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
+    )
+
+    sizes = serializers.PrimaryKeyRelatedField(
+        queryset=Size.objects.all(),
+        many=True
+    )
 
     class Meta:
         model = Product
